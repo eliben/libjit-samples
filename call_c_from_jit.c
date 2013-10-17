@@ -1,3 +1,9 @@
+//------------------------------------------------------------------------------
+// call_c_from_jit libjit sample.
+//
+// Eli Bendersky (eliben@gmail.com)
+// This code is in the public domain
+//------------------------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
 #include <jit/jit.h>

@@ -1,6 +1,10 @@
+//------------------------------------------------------------------------------
+// gcd.c Taken from the libjit tutorial, part 2.
+//
+// The libjit license applies to this file.
+//------------------------------------------------------------------------------
 /*
- * Taken from the libjit tutorial, part 2. JITs this gcd function:
- *
+ * JITs this gcd function:
  * unsigned int gcd(unsigned int x, unsigned int y) {
  *  if (x == y)
  *    return x;

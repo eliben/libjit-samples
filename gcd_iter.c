@@ -1,3 +1,9 @@
+//------------------------------------------------------------------------------
+// gcd_iter libjit sample. Iterative version of gcd.c
+//
+// Eli Bendersky (eliben@gmail.com)
+// This code is in the public domain
+//------------------------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
