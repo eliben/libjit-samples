@@ -10,7 +10,7 @@
 #include <time.h>
 #include <jit/jit.h>
 
-
+// Native version for benchmarking
 int __attribute__ ((noinline)) gcd_iter_native(int u, int v) {
   int t;
   while (v) {
@@ -21,19 +21,27 @@ int __attribute__ ((noinline)) gcd_iter_native(int u, int v) {
   return u < 0 ? -u : u; /* abs(u) */
 }
 
-struct timespec diff(struct timespec start, struct timespec end)
-{
-  struct timespec temp;
-  if ((end.tv_nsec-start.tv_nsec)<0) {
-    temp.tv_sec = end.tv_sec-start.tv_sec-1;
-    temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
+// Compute difference between two timespecs, as a timespec.
+struct timespec timespec_diff(struct timespec start, struct timespec end) {
+  const long SEC = 1000 * 1000 * 1000;  // 1 sec in ns
+  struct timespec diff;
+  if (end.tv_nsec < start.tv_nsec) {
+    diff.tv_sec = end.tv_sec - start.tv_sec - 1;
+    diff.tv_nsec = SEC + end.tv_nsec - start.tv_nsec;
   } else {
-    temp.tv_sec = end.tv_sec-start.tv_sec;
-    temp.tv_nsec = end.tv_nsec-start.tv_nsec;
+    diff.tv_sec = end.tv_sec - start.tv_sec;
+    diff.tv_nsec = end.tv_nsec - start.tv_nsec;
   }
-  return temp;
+
+  return diff;
 }
 
+void print_diff(struct timespec start, struct timespec end) {
+  struct timespec diff = timespec_diff(start, end);
+  printf("Elapsed %ld . %ld\n", diff.tv_sec, diff.tv_nsec);
+}
+
+// Run a benchmark
 void benchmark(jit_function_t jit_f) {
   int n1 = 49979687;
   int n2 = 982451653;
@@ -52,27 +60,24 @@ void benchmark(jit_function_t jit_f) {
     g = gcd_iter_native(n1, n2);
   }
   clock_gettime(CLOCK_REALTIME, &t2);
-  d = diff(t1, t2);
-  printf("Elapsed %ld . %ld\n", d.tv_sec, d.tv_nsec);
+  print_diff(t1, t2);
 
-  printf("\n\nJIT apply\n");
+  printf("\nJIT apply\n");
   clock_gettime(CLOCK_REALTIME, &t1);
   for (i = 0; i < N; ++i) {
     jit_function_apply(jit_f, args, &result);
   }
   clock_gettime(CLOCK_REALTIME, &t2);
-  d = diff(t1, t2);
-  printf("Elapsed %ld . %ld\n", d.tv_sec, d.tv_nsec);
+  print_diff(t1, t2);
 
-  printf("\n\nJIT closure\n");
+  printf("\nJIT closure\n");
   FF clos = jit_function_to_closure(jit_f);
   clock_gettime(CLOCK_REALTIME, &t1);
   for (i = 0; i < N; ++i) {
     g = clos(n1, n2);
   }
   clock_gettime(CLOCK_REALTIME, &t2);
-  d = diff(t1, t2);
-  printf("Elapsed %ld . %ld\n", d.tv_sec, d.tv_nsec);
+  print_diff(t1, t2);
 }
 
 
@@ -171,17 +176,19 @@ int main(int argc, char** argv) {
   /*jit_dump_function(stdout, gcd, "gcd [compiled]");*/
 
   // Run the function on argv input
-  int u = atoi(argv[1]);
-  int v = atoi(argv[2]);
-  void* args[2] = {&u, &v};
+  if (argc >= 3) {
+    int u = atoi(argv[1]);
+    int v = atoi(argv[2]);
+    void* args[2] = {&u, &v};
 
-  printf("gcd(%d, %d) --> ", u, v);
-  jit_int result;
-  jit_function_apply(gcd, args, &result);
-  /*typedef int (*FF)(int, int);*/
-  /*FF gcd_f = jit_function_to_closure(gcd);*/
-  /*int result = gcd_f(u, v);*/
-  printf("%d\n", (int)result);
+    printf("gcd(%d, %d) --> ", u, v);
+    jit_int result;
+    jit_function_apply(gcd, args, &result);
+    /*typedef int (*FF)(int, int);*/
+    /*FF gcd_f = jit_function_to_closure(gcd);*/
+    /*int result = gcd_f(u, v);*/
+    printf("%d\n", (int)result);
+  }
 
   benchmark(gcd);
 
