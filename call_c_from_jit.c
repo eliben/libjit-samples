@@ -14,6 +14,15 @@ int my_multiplier(int a, int b) {
 }
 
 
+// Builds this function:
+//
+// int foo(int x, int y) {
+//   int t = x + y;
+//   x = my_multiplier(t, y);
+//   return x;
+// }
+//
+// Returns an uncompiled jit_function_t
 jit_function_t build_foo(jit_context_t context) {
   jit_context_build_start(context);
 
@@ -69,14 +78,16 @@ int main(int argc, char** argv) {
   jit_dump_function(stdout, foo, "foo [compiled]");
 
   // Run the function on argv input
-  int u = atoi(argv[1]);
-  int v = atoi(argv[2]);
-  void* args[2] = {&u, &v};
+  if (argc > 2) {
+    int u = atoi(argv[1]);
+    int v = atoi(argv[2]);
+    void* args[2] = {&u, &v};
 
-  printf("foo(%d, %d) --> ", u, v);
-  jit_int result;
-  jit_function_apply(foo, args, &result);
-  printf("%d\n", (int)result);
+    printf("foo(%d, %d) --> ", u, v);
+    jit_int result;
+    jit_function_apply(foo, args, &result);
+    printf("%d\n", (int)result);
+  }
 
   jit_context_destroy(context);
   return 0;

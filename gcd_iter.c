@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
   jit_function_t gcd = build_gcd_func(context);
 
   // This will dump the uncompiled function, showing libjit opcodes
-  /*jit_dump_function(stdout, gcd, "gcd [uncompiled]");*/
+  jit_dump_function(stdout, gcd, "gcd [uncompiled]");
 
   // Compile (JIT) the function to machine code
   jit_context_build_start(context);
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
   /*jit_dump_function(stdout, gcd, "gcd [compiled]");*/
 
   // Run the function on argv input
-  if (argc >= 3) {
+  if (argc > 2) {
     int u = atoi(argv[1]);
     int v = atoi(argv[2]);
     void* args[2] = {&u, &v};
