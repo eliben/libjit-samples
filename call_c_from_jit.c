@@ -44,10 +44,9 @@ jit_function_t build_jit_adder(jit_context_t context) {
 
 // Builds this function:
 //
-// int foo(int x, int y) {
+// void foo(int x, int y, int* result) {
 //   int t = jit_adder(x, y);
-//   x = native_multiplier(t, y);
-//   return x;
+//   *result = native_multiplier(t, y);
 // }
 //
 // Returns an uncompiled jit_function_t
@@ -55,15 +54,17 @@ jit_function_t build_jit_adder(jit_context_t context) {
 jit_function_t build_foo(jit_context_t context, jit_function_t jit_adder) {
   jit_context_build_start(context);
 
-  // Create function signature and object. int (*)(int, int)
-  jit_type_t params[2] = {jit_type_int, jit_type_int};
+  // Create function signature and object. int (*)(int, int, void*)
+  // libjit treats all native pointers as void*.
+  jit_type_t params[] = {jit_type_int, jit_type_int, jit_type_void_ptr};
   jit_type_t signature = jit_type_create_signature(
-      jit_abi_cdecl, jit_type_int, params, 2, 1);
+      jit_abi_cdecl, jit_type_void, params, 3, 1);
   jit_function_t F = jit_function_create(context, signature);
 
-  // x, y are the parameters; t is a temporary
+  // x, y, result are the parameters; t is a temporary
   jit_value_t x = jit_value_get_param(F, 0);
   jit_value_t y = jit_value_get_param(F, 1);
+  jit_value_t result = jit_value_get_param(F, 2);
   jit_value_t t = jit_value_create(F, jit_type_int);
 
   // t = jit_adder(x, y)
@@ -85,8 +86,10 @@ jit_function_t build_foo(jit_context_t context, jit_function_t jit_adder) {
       mult_args, sizeof(mult_args) / sizeof(jit_value_t), JIT_CALL_NOTHROW);
   jit_insn_store(F, x, res);
 
-  // return x
-  jit_insn_return(F, x);
+  // *result = x
+  // Note that this creates a store of a value libjit considers to be a
+  // jit_type_int, so the pointer must point to at least that size.
+  jit_insn_store_relative(F, result, 0, x);
 
   jit_context_build_end(context);
   return F;
@@ -117,12 +120,12 @@ int main(int argc, char** argv) {
   if (argc > 2) {
     int u = atoi(argv[1]);
     int v = atoi(argv[2]);
-    void* args[2] = {&u, &v};
+    int result, *presult = &result;
+    void* args[] = {&u, &v, &presult};
 
     printf("foo(%d, %d) --> ", u, v);
-    jit_int result;
-    jit_function_apply(foo, args, &result);
-    printf("%d\n", (int)result);
+    jit_function_apply(foo, args, NULL);
+    printf("%d\n", result);
   }
 
   jit_context_destroy(context);
