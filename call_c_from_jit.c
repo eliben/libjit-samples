@@ -32,7 +32,7 @@ jit_function_t build_jit_adder(jit_context_t context) {
   jit_value_t y = jit_value_get_param(F, 1);
   jit_value_t sum = jit_value_create(F, jit_type_int);
 
-  // sumt = x + y
+  // sum = x + y
   jit_value_t temp_sum = jit_insn_add(F, x, y);
   jit_insn_store(F, sum, temp_sum);
 
@@ -51,7 +51,7 @@ jit_function_t build_jit_adder(jit_context_t context) {
 // }
 //
 // Returns an uncompiled jit_function_t
-// Note that jit_adder is a jit_function_t that's passed in
+// Note that jit_adder is a jit_function_t that's passed into this builder.
 jit_function_t build_foo(jit_context_t context, jit_function_t jit_adder) {
   jit_context_build_start(context);
 
