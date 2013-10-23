@@ -37,15 +37,13 @@ int main(int argc, char** argv) {
   jit_insn_store_relative(F, bufptr, 2, CONST_BYTE('c'));
   jit_insn_store_relative(F, bufptr, 3, CONST_BYTE('\x00'));
 
-  // Prepare calling puts: create its signature - int (*)(char*)
-  jit_type_t puts_params[] = {type_cstring};
+  // Create the signature of puts: int (*)(char*)
   jit_type_t puts_signature = jit_type_create_signature(
-      jit_abi_cdecl, jit_type_int, puts_params, 1, 1);
+      jit_abi_cdecl, jit_type_int, &type_cstring, 1, 1);
 
   // puts(bufptr);
-  jit_value_t puts1_args[] = {bufptr};
   jit_insn_call_native(
-      F, "puts", puts, puts_signature, puts1_args, 1, JIT_CALL_NOTHROW);
+      F, "puts", puts, puts_signature, &bufptr, 1, JIT_CALL_NOTHROW);
 
   // Approach #2: use the address of a string literal in the host code directly,
   // storing it into a constant. Note that this has to explicitly specify that
@@ -54,9 +52,8 @@ int main(int argc, char** argv) {
   jit_value_t hostmemptr = jit_value_create_long_constant(
       F, type_cstring, (long)"foobar");
 
-  jit_value_t puts2_args[] = {hostmemptr};
   jit_insn_call_native(
-      F, "puts", puts, puts_signature, puts2_args, 1, JIT_CALL_NOTHROW);
+      F, "puts", puts, puts_signature, &hostmemptr, 1, JIT_CALL_NOTHROW);
 
   jit_dump_function(stdout, F, "F [uncompiled]");
   jit_function_compile(F);
