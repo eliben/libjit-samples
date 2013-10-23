@@ -14,9 +14,8 @@ int main(int argc, char** argv) {
   jit_context_t context = jit_context_create();
 
   // void foo()
-  jit_type_t signature = jit_type_create_signature(
-      jit_abi_cdecl, jit_type_void, NULL, 0, 1);
-  jit_function_t F = jit_function_create(context, signature);
+  jit_function_t F = jit_function_create(context,
+      jit_type_create_signature(jit_abi_cdecl, jit_type_void, NULL, 0, 1));
 
   // Approach #1: allocate the string buffer on stack inside the jit-ed
   // function and store the desired characters into it.
@@ -27,9 +26,7 @@ int main(int argc, char** argv) {
   jit_value_t bufptr = jit_value_create(F, type_cstring);
 
   // Make bufptr point to a 4-byte buffer allocated on the stack
-  jit_value_t bufsize = CONST_BYTE(4);
-  jit_value_t alloca_result = jit_insn_alloca(F, bufsize);
-  jit_insn_store(F, bufptr, alloca_result);
+  jit_insn_store(F, bufptr, jit_insn_alloca(F, CONST_BYTE(4)));
 
   // Store "abc" (with explicit terminating zero) into bufptr
   jit_insn_store_relative(F, bufptr, 0, CONST_BYTE('a'));
