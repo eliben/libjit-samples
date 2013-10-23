@@ -54,7 +54,7 @@ jit_function_t build_jit_adder(jit_context_t context) {
 jit_function_t build_foo(jit_context_t context, jit_function_t jit_adder) {
   jit_context_build_start(context);
 
-  // Create function signature and object. int (*)(int, int, void*)
+  // Create function signature and object. void (*)(int, int, void*)
   // libjit treats all native pointers as void*.
   jit_type_t params[] = {jit_type_int, jit_type_int, jit_type_void_ptr};
   jit_type_t signature = jit_type_create_signature(
