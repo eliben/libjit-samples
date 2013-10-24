@@ -9,7 +9,7 @@
 #include <jit/jit.h>
 
 
-int native_multiplier(int a, int b) {
+int native_mult(int a, int b) {
   return a * b;
 }
 
@@ -46,7 +46,7 @@ jit_function_t build_jit_adder(jit_context_t context) {
 //
 // void foo(int x, int y, int* result) {
 //   int t = jit_adder(x, y);
-//   *result = native_multiplier(t, y);
+//   *result = native_mult(t, y);
 // }
 //
 // Returns an uncompiled jit_function_t
@@ -74,15 +74,15 @@ jit_function_t build_foo(jit_context_t context, jit_function_t jit_adder) {
 
   jit_insn_store(F, t, call_temp);
 
-  // Prepare calling native_multiplier: create its signature
+  // Prepare calling native_mult: create its signature
   jit_type_t mult_params[] = {jit_type_int, jit_type_int};
   jit_type_t mult_signature = jit_type_create_signature(
       jit_abi_cdecl, jit_type_int, params, 2, 1);
 
-  // x = native_multiplier(t, y)
+  // x = native_mult(t, y)
   jit_value_t mult_args[] = {t, y};
   jit_value_t res = jit_insn_call_native(
-      F, "native_multiplier", native_multiplier, mult_signature,
+      F, "native_mult", native_mult, mult_signature,
       mult_args, sizeof(mult_args) / sizeof(jit_value_t), JIT_CALL_NOTHROW);
   jit_insn_store(F, x, res);
 
