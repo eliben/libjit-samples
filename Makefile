@@ -17,7 +17,8 @@ CCOPT = -g -O0
 CCFLAGS = -c $(CCOPT)
 LDFLAGS = -lpthread -lm -ldl -lrt
 
-all: gcd gcd_iter call_c_from_jit call_puts_from_jit
+all: gcd gcd_iter call_c_from_jit call_puts_from_jit \
+		 basic_self_jit_x64
 
 gcd: gcd.o
 	$(LD) $^ $(LIBJIT_AR) $(LDFLAGS) -o $@
@@ -43,7 +44,11 @@ call_puts_from_jit: call_puts_from_jit.o
 call_puts_from_jit.o: call_puts_from_jit.c
 	$(CC) -I$(LIBJIT_INCLUDE_PATH) -I. $(CCFLAGS) $^ -o $@
 
+basic_self_jit_x64: basic_self_jit_x64.c
+	$(CC) $(CCOPT) $^ -o $@
+
 clean:
-	rm -rf *.o gcd gcd_iter call_c_from_jit call_puts_from_jit
+	rm -rf *.o gcd gcd_iter call_c_from_jit call_puts_from_jit \
+				 basic_self_jit_x64
 
 
