@@ -58,20 +58,34 @@ void emit_code_into_memory(unsigned char* m) {
   memcpy(m, code, sizeof(code));
 }
 
+const size_t SIZE = 1024;
 typedef long (*JittedFunc)(long);
 
+// Allocates RWX memory directly.
+void run_from_rwx() {
+  void* m = alloc_executable_memory(SIZE);
+  emit_code_into_memory(m);
 
-int main(int argc, char** argv) {
-  const size_t SIZE = 1024;
+  JittedFunc func = m;
+  int result = func(2);
+  printf("result = %d\n", result);
+}
+
+// Allocates RW memory, emits the code into it and sets it to RX before 
+// executing.
+void emit_to_rw_run_from_rx() {
   void* m = alloc_writable_memory(SIZE);
   emit_code_into_memory(m);
   make_memory_executable(m, SIZE);
 
-  // Finally, run the "JITed" code as a long (*)(long), passing it an argument
   JittedFunc func = m;
-
   int result = func(2);
   printf("result = %d\n", result);
+}
+
+int main(int argc, char** argv) {
+  run_from_rwx();
+  emit_to_rw_run_from_rx();
 
   return 0;
 }
