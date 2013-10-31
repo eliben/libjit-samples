@@ -96,6 +96,16 @@ jit_function_t build_foo(jit_context_t context, jit_function_t jit_adder) {
 }
 
 
+// Run foo with arguments and return its result
+int run_foo(jit_function_t jit_foo, int x, int y) {
+  int result, *presult = &result;
+  void* args[] = {&x, &y, &presult};
+
+  jit_function_apply(jit_foo, args, NULL);
+  return result;
+}
+
+
 int main(int argc, char** argv) {
   jit_init();
   jit_context_t context = jit_context_create();
@@ -120,12 +130,7 @@ int main(int argc, char** argv) {
   if (argc > 2) {
     int u = atoi(argv[1]);
     int v = atoi(argv[2]);
-    int result, *presult = &result;
-    void* args[] = {&u, &v, &presult};
-
-    printf("foo(%d, %d) --> ", u, v);
-    jit_function_apply(foo, args, NULL);
-    printf("%d\n", result);
+    printf("foo(%d, %d) --> %d\n", u, v, run_foo(foo, u, v));
   }
 
   jit_context_destroy(context);
