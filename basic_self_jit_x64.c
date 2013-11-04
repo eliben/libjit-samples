@@ -26,7 +26,8 @@ void* alloc_executable_memory(size_t size) {
 }
 
 // Allocates RW memory of given size and returns a pointer to it. On failure,
-// prints out the error and returns NULL. Unlike malloc, the memory is allocated
+// prints out the error and returns NULL. mmap is used to allocate, so
+// deallocation has to be done with munmap, and the memory is allocated
 // on a page boundary so it's suitable for calling mprotect.
 void* alloc_writable_memory(size_t size) {
   void* ptr = mmap(0, size,
@@ -71,7 +72,7 @@ void run_from_rwx() {
   printf("result = %d\n", result);
 }
 
-// Allocates RW memory, emits the code into it and sets it to RX before 
+// Allocates RW memory, emits the code into it and sets it to RX before
 // executing.
 void emit_to_rw_run_from_rx() {
   void* m = alloc_writable_memory(SIZE);
