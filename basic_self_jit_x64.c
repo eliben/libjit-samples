@@ -53,7 +53,7 @@ int make_memory_executable(void* m, size_t size) {
 void emit_code_into_memory(unsigned char* m) {
   unsigned char code[] = {
     0x48, 0x89, 0xf8,                   // mov %rdi, %rax
-    0x48, 0x83, 0xc0, 0x28,             // add $4, %rax
+    0x48, 0x83, 0xc0, 0x04,             // add $4, %rax
     0xc3                                // ret
   };
   memcpy(m, code, sizeof(code));
