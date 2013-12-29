@@ -167,13 +167,14 @@ int main(int argc, char** argv) {
   // This will dump the uncompiled function, showing libjit opcodes
   jit_dump_function(stdout, gcd, "gcd [uncompiled]");
 
+  printf("Optimization level: %u\n", jit_function_get_optimization_level(gcd));
   // Compile (JIT) the function to machine code
   jit_context_build_start(context);
   jit_function_compile(gcd);
   jit_context_build_end(context);
 
   // This will dump the disassembly of the machine code for the function
-  /*jit_dump_function(stdout, gcd, "gcd [compiled]");*/
+  jit_dump_function(stdout, gcd, "gcd [compiled]");
 
   // Run the function on argv input
   if (argc > 2) {
@@ -190,7 +191,7 @@ int main(int argc, char** argv) {
     printf("%d\n", (int)result);
   }
 
-  benchmark(gcd);
+  /*benchmark(gcd);*/
 
   jit_context_destroy(context);
   return 0;
